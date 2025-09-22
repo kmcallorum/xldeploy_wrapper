@@ -6,6 +6,8 @@ on:
 
 jobs:
   attach-release-notes:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
