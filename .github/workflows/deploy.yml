@@ -35,7 +35,7 @@ jobs:
           bash -c "cd /mock-issueops && npm install && npm start"
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
       - name: Wait for Mock IssueOps
         run: |
@@ -56,7 +56,7 @@ jobs:
     outputs:
       PACKAGE_ID: ${{ steps.deploy.outputs.PACKAGE_ID }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - id: deploy
         uses: your-org/xldeploy-github-action@v1
         with:
@@ -78,7 +78,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy-dev
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - uses: your-org/xldeploy-github-action@v1
         with:
           ENV: TST
@@ -98,7 +98,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy-tst
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - uses: your-org/xldeploy-github-action@v1
         with:
           ENV: STG
@@ -118,7 +118,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy-stg
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - uses: your-org/xldeploy-github-action@v1
         with:
           ENV: PRD
