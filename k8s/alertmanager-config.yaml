@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: xlda-monitoring
+data:
+  alertmanager.yml: |
+    route:
+      receiver: default
+    receivers:
+      - name: default
+        # Example Microsoft Teams via webhook (use Alertmanager webhook receiver to a bridge like 'prom2teams' or custom)
+        # For direct Teams integration, deploy 'prometheus-msteams' bridge and point a receiver webhook there.
+        webhook_configs:
+          - url: "http://prometheus-msteams.xlda-monitoring.svc.cluster.local:2000"

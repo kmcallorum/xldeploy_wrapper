@@ -1,0 +1,18 @@
+site_name: XLDeploy GitHub Action
+site_description: Documentation for XLDeploy GitHub Action with Teams, ServiceNow, IssueOps, and Prometheus integration
+repo_url: https://github.com/your-org/xldeploy-github-action
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.top
+    - search.highlight
+    - search.share
+nav:
+  - Home: index.md
+  - Usage: usage.md
+  - Monitoring: monitoring.md
+  - IssueOps: issueops.md
+  - Contributing: ../CONTRIBUTING.md
+  - Security: ../SECURITY.md
+  - Changelog: ../CHANGELOG.md

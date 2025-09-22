@@ -1,0 +1,31 @@
+name: Performance Benchmark
+
+on:
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install benchmarking tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y hyperfine jq
+
+      - name: Benchmark entrypoint.sh
+        run: |
+          echo "Running benchmark for entrypoint.sh"
+          hyperfine --export-json benchmark_results.json './.github/actions/xldeploy-deploy/entrypoint.sh || true'
+
+      - name: Parse benchmark results
+        run: |
+          cat benchmark_results.json | jq '.results[0] | {mean, stddev, user, system}' > benchmark_summary.json
+          cat benchmark_summary.json
+
+      - name: Upload Benchmark Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: benchmark-results
+          path: benchmark_summary.json

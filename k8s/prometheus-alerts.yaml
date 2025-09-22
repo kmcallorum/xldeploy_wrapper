@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alert-rules
+  namespace: xlda-monitoring
+data:
+  alert_rules.yml: |
+    groups:
+      - name: xldeploy-action-alerts
+        rules:
+          - alert: ProdDeploymentFailure
+            expr: deployment_status{environment="PRD"} == 0
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Prod deployment failed"
+              description: "A PROD deployment has failed in XLDeploy GitHub Action."
+          - alert: BenchmarkRegression
+            expr: deployment_benchmark_mean > 5
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Benchmark regression detected"
+              description: "Average runtime of entrypoint.sh exceeds 5s threshold."

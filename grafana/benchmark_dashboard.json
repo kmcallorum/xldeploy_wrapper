@@ -1,0 +1,25 @@
+{
+  "title": "XLDeploy Action Benchmark Trends",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Execution Time (mean)",
+      "targets": [
+        {
+          "expr": "deployment_benchmark_mean",
+          "legendFormat": "Mean runtime (s)"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Execution Time StdDev",
+      "targets": [
+        {
+          "expr": "deployment_benchmark_stddev",
+          "legendFormat": "StdDev runtime (s)"
+        }
+      ]
+    }
+  ]
+}

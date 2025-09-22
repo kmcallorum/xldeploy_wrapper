@@ -1,0 +1,24 @@
+name: Attach Release Notes
+
+on:
+  release:
+    types: [created, published]
+
+jobs:
+  attach-release-notes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Prepare Release Notes
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          DATE=$(date -u +"%Y-%m-%d")
+          sed "s/{{version}}/$VERSION/g; s/{{date}}/$DATE/g" .github/release_notes.md > final_notes.md
+
+      - name: Update GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: final_notes.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,39 @@
+name: Test Coverage
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Bats & kcov
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bats kcov
+
+      - name: Run Bats tests with coverage
+        run: |
+          mkdir -p coverage
+          for test in tests/*.bats; do
+            kcov --include-path=. --exclude-pattern=/usr,/lib coverage bats $test
+          done
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage/
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/
+          flags: unittests
+          name: xldeploy-action

@@ -1,0 +1,136 @@
+name: XLDeploy Sequential Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      PACKAGE_VERSION:
+        description: 'Optional package version to deploy'
+        required: false
+      OVERRIDE_VERSION:
+        description: 'Optional override version'
+        required: false
+      SERVICENOW_TICKET:
+        description: 'ServiceNow change ticket (required for PRD)'
+        required: false
+      ISSUEOPS_ISSUE_ID:
+        description: 'IssueOps issue ID linked to this deployment'
+        required: false
+
+jobs:
+  test-mock-issueops:
+    runs-on: ubuntu-latest
+    services:
+      issueops:
+        image: node:18
+        ports:
+          - 3000:3000
+        options: >-
+          --health-cmd="curl --fail http://localhost:3000/issues/123 || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        volumes:
+          - ./mock-issueops:/mock-issueops
+        command: >
+          bash -c "cd /mock-issueops && npm install && npm start"
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Wait for Mock IssueOps
+        run: |
+          echo "Waiting for IssueOps mock service..."
+          for i in {1..10}; do
+            curl -s http://localhost:3000/issues/123 && break
+            sleep 5
+          done
+
+      - name: Test IssueOps API
+        run: |
+          curl -X PATCH http://localhost:3000/issues/123             -H "Content-Type: application/json"             -d '{"status":"Test Deployment","deployment_env":"DEV","package":"test-app:0.1.0"}'
+          curl -s http://localhost:3000/issues/123
+
+  deploy-dev:
+    needs: test-mock-issueops
+    runs-on: ubuntu-latest
+    outputs:
+      PACKAGE_ID: ${{ steps.deploy.outputs.PACKAGE_ID }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: deploy
+        uses: your-org/xldeploy-github-action@v1
+        with:
+          ENV: DEV
+          APP_NAME: my-application
+          PACKAGE_VERSION: ${{ github.event.inputs.PACKAGE_VERSION }}
+          OVERRIDE_VERSION: ${{ github.event.inputs.OVERRIDE_VERSION }}
+          REQUIRED_APPROVERS: 0
+          XLD_USER: ${{ secrets.XLD_USER }}
+          XLD_PASS: ${{ secrets.XLD_PASS }}
+          XLD_SERVER: ${{ secrets.XLD_SERVER }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          PROMETHEUS_PUSHGATEWAY_URL: ${{ secrets.PROMETHEUS_PUSHGATEWAY_URL }}
+          ISSUEOPS_API_URL: ${{ secrets.ISSUEOPS_API_URL }}
+          ISSUEOPS_API_TOKEN: ${{ secrets.ISSUEOPS_API_TOKEN }}
+          ISSUEOPS_ISSUE_ID: ${{ github.event.inputs.ISSUEOPS_ISSUE_ID }}
+
+  deploy-tst:
+    runs-on: ubuntu-latest
+    needs: deploy-dev
+    steps:
+      - uses: actions/checkout@v3
+      - uses: your-org/xldeploy-github-action@v1
+        with:
+          ENV: TST
+          APP_NAME: my-application
+          PACKAGE_VERSION: ${{ needs.deploy-dev.outputs.PACKAGE_ID }}
+          REQUIRED_APPROVERS: 1
+          XLD_USER: ${{ secrets.XLD_USER }}
+          XLD_PASS: ${{ secrets.XLD_PASS }}
+          XLD_SERVER: ${{ secrets.XLD_SERVER }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          PROMETHEUS_PUSHGATEWAY_URL: ${{ secrets.PROMETHEUS_PUSHGATEWAY_URL }}
+          ISSUEOPS_API_URL: ${{ secrets.ISSUEOPS_API_URL }}
+          ISSUEOPS_API_TOKEN: ${{ secrets.ISSUEOPS_API_TOKEN }}
+          ISSUEOPS_ISSUE_ID: ${{ github.event.inputs.ISSUEOPS_ISSUE_ID }}
+
+  deploy-stg:
+    runs-on: ubuntu-latest
+    needs: deploy-tst
+    steps:
+      - uses: actions/checkout@v3
+      - uses: your-org/xldeploy-github-action@v1
+        with:
+          ENV: STG
+          APP_NAME: my-application
+          PACKAGE_VERSION: ${{ needs.deploy-tst.outputs.PACKAGE_ID }}
+          REQUIRED_APPROVERS: 2
+          XLD_USER: ${{ secrets.XLD_USER }}
+          XLD_PASS: ${{ secrets.XLD_PASS }}
+          XLD_SERVER: ${{ secrets.XLD_SERVER }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          PROMETHEUS_PUSHGATEWAY_URL: ${{ secrets.PROMETHEUS_PUSHGATEWAY_URL }}
+          ISSUEOPS_API_URL: ${{ secrets.ISSUEOPS_API_URL }}
+          ISSUEOPS_API_TOKEN: ${{ secrets.ISSUEOPS_API_TOKEN }}
+          ISSUEOPS_ISSUE_ID: ${{ github.event.inputs.ISSUEOPS_ISSUE_ID }}
+
+  deploy-prd:
+    runs-on: ubuntu-latest
+    needs: deploy-stg
+    steps:
+      - uses: actions/checkout@v3
+      - uses: your-org/xldeploy-github-action@v1
+        with:
+          ENV: PRD
+          APP_NAME: my-application
+          PACKAGE_VERSION: ${{ needs.deploy-stg.outputs.PACKAGE_ID }}
+          REQUIRED_APPROVERS: 2
+          SERVICENOW_TICKET: ${{ github.event.inputs.SERVICENOW_TICKET }}
+          XLD_USER: ${{ secrets.XLD_USER }}
+          XLD_PASS: ${{ secrets.XLD_PASS }}
+          XLD_SERVER: ${{ secrets.XLD_SERVER }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          PROMETHEUS_PUSHGATEWAY_URL: ${{ secrets.PROMETHEUS_PUSHGATEWAY_URL }}
+          ISSUEOPS_API_URL: ${{ secrets.ISSUEOPS_API_URL }}
+          ISSUEOPS_API_TOKEN: ${{ secrets.ISSUEOPS_API_TOKEN }}
+          ISSUEOPS_ISSUE_ID: ${{ github.event.inputs.ISSUEOPS_ISSUE_ID }}

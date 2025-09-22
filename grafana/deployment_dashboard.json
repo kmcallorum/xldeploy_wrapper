@@ -1,0 +1,34 @@
+{
+  "title": "XLDeploy Deployment Dashboard",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Latest Deployment Status",
+      "targets": [
+        {
+          "expr": "deployment_status{environment=~"DEV|TST|STG|PRD"}",
+          "legendFormat": "{{environment}} - {{application}}:{{package}}"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Deployment Success/Failure Over Time",
+      "targets": [
+        {
+          "expr": "deployment_status",
+          "legendFormat": "{{environment}}"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Prod Approvals & ServiceNow",
+      "targets": [
+        {
+          "expr": "deployment_prod_info"
+        }
+      ]
+    }
+  ]
+}

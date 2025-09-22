@@ -1,0 +1,48 @@
+name: 'XLDeploy Deployment Action'
+description: 'Reusable GitHub Action for XL Deploy deployments with Teams, ServiceNow, IssueOps, and Prometheus integration'
+author: 'your-org'
+
+inputs:
+  ENV:
+    description: 'Deployment environment (DEV, TST, STG, PRD)'
+    required: true
+  APP_NAME:
+    description: 'Application name in XL Deploy'
+    required: true
+  PACKAGE_VERSION:
+    description: 'Optional package version to deploy'
+    required: false
+  OVERRIDE_VERSION:
+    description: 'Optional override version'
+    required: false
+  REQUIRED_APPROVERS:
+    description: 'Number of required approvers for upper environments'
+    required: false
+    default: '2'
+  SERVICENOW_TICKET:
+    description: 'ServiceNow change ticket (required for PRD)'
+    required: false
+  ISSUEOPS_ISSUE_ID:
+    description: 'IssueOps issue ID linked to this deployment'
+    required: false
+  XLD_USER:
+    required: true
+  XLD_PASS:
+    required: true
+  XLD_SERVER:
+    required: true
+  TEAMS_WEBHOOK_URL:
+    required: true
+  PROMETHEUS_PUSHGATEWAY_URL:
+    required: false
+  ISSUEOPS_API_URL:
+    required: false
+  ISSUEOPS_API_TOKEN:
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run XL Deploy Script
+      shell: bash
+      run: ./.github/actions/xldeploy-deploy/entrypoint.sh

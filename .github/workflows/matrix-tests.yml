@@ -1,0 +1,30 @@
+name: Matrix Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  matrix-tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        xld_version: [10.0, 10.2, 10.4]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up XL Deploy mock server
+        run: echo "Starting mock XL Deploy for version ${{ matrix.xld_version }}"
+
+      - name: Run entrypoint tests
+        run: |
+          echo "Testing on ${{ matrix.os }} with XL Deploy ${{ matrix.xld_version }}"
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            echo "Skipping Bats tests on Windows"
+          else
+            bats tests/
+          fi

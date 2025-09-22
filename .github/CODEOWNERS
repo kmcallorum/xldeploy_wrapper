@@ -1,0 +1,20 @@
+# CODEOWNERS file
+# Automatically request reviews from code owners when relevant files are modified
+
+# Action and workflow files
+.github/actions/* @devops-team @platform-leads
+.github/workflows/* @devops-team @platform-leads
+
+# Deployment scripts
+*.sh @release-engineers
+
+# Documentation
+README.md @docs-team
+CONTRIBUTING.md @docs-team
+SECURITY.md @security-team
+
+# Mock server
+mock-issueops/* @qa-team
+
+# Catch-all
+* @maintainers
