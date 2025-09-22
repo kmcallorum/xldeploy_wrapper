@@ -25,7 +25,7 @@ jobs:
           cat benchmark_summary.json
 
       - name: Upload Benchmark Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: benchmark-results
           path: benchmark_summary.json
