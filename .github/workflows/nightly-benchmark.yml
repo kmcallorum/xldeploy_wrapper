@@ -1,4 +1,6 @@
 name: Nightly Performance Benchmark
+permissions:
+  contents: read
 
 on:
   schedule:
