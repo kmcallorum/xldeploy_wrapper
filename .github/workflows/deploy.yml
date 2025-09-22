@@ -1,4 +1,6 @@
 name: XLDeploy Sequential Pipeline
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:
